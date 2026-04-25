@@ -1,0 +1,15 @@
+[project]
+name = "mlops-gcp"
+version = "0.0.1a"
+description = "IaC for MLOps on Google Cloud Platform"
+authors = [
+    { name = "keiferc", email = "15503711+keiferc@users.noreply.github.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.5.1",
+]
