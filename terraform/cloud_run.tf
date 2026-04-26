@@ -49,7 +49,7 @@ resource "google_cloud_run_v2_service" "mlflow" {
       # /bin/sh -c expands $MLFLOW_BACKEND_STORE_URI from the environment.
       command = ["/bin/sh", "-c"]
       args = [
-        "mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri $MLFLOW_BACKEND_STORE_URI --artifacts-destination gs://${var.mlflow_artifact_bucket_name}/artifacts --serve-artifacts"
+        "mlflow server --host 0.0.0.0 --port $PORT --backend-store-uri $MLFLOW_BACKEND_STORE_URI --artifacts-destination gs://${var.mlflow_artifact_bucket_name}/artifacts --serve-artifacts"
       ]
 
       # Pull the full Postgres URI from Secret Manager at container startup.

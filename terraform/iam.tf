@@ -1,13 +1,4 @@
 # ---------------------------------------------------------------------------
-# Grants artifact registry writing permissions to user
-# ---------------------------------------------------------------------------
-resource "google_project_iam_member" "artifact_registry_writer" {
-  project = var.project_id
-  role    = "roles/artifactregistry.writer"
-  member  = "user:${var.user_email}"
-}
-
-# ---------------------------------------------------------------------------
 # Dedicated service account for the Cloud Run MLflow server process.
 # ---------------------------------------------------------------------------
 resource "google_service_account" "cloud_run" {
