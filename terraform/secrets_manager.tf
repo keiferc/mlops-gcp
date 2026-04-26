@@ -1,31 +1,38 @@
+# Store Cloud SQL Database Password in Secrets Manager
 resource "google_secret_manager_secret" "db_password" {
   secret_id = "mlflow-db-password"
+
+  labels = local.labels
 
   replication {
     auto {}
   }
-
-  depends_on = [google_project_service.required_apis]
 }
 
+# Secret Version (actual password value)
 resource "google_secret_manager_secret_version" "db_password" {
   secret      = google_secret_manager_secret.db_password.id
-  secret_data = var.db_password
+  secret_data = random_string.db_password.result
 }
 
-# Grant Secret Manager access to Vertex AI service account
-# Note: Update the Vertex AI service account email if different
-resource "google_secret_manager_secret_iam_member" "vertex_ai_access" {
-  secret_id = google_secret_manager_secret.db_password.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${data.google_client_config.default.project}@aiplatform.iam.gserviceaccount.com"
+# Store Cloud SQL connection string secret
+resource "google_secret_manager_secret" "db_connection_string" {
+  secret_id = "mlflow-db-connection-string"
 
-  depends_on = [google_secret_manager_secret.db_password]
+  labels = local.labels
+
+  replication {
+    auto {}
+  }
 }
 
-data "google_client_config" "default" {}
-
-output "secret_manager_secret_version" {
-  description = "Secret Manager secret version"
-  value       = google_secret_manager_secret_version.db_password.name
+resource "google_secret_manager_secret_version" "db_connection_string" {
+  secret = google_secret_manager_secret.db_connection_string.id
+  secret_data = format(
+    "postgresql://%s:%s@%s/%s",
+    var.cloud_sql_db_user,
+    random_string.db_password.result,
+    google_sql_database_instance.mlflow.private_ip_address,
+    var.cloud_sql_database_name
+  )
 }

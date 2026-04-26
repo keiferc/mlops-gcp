@@ -12,21 +12,33 @@ IaC for MLOps on Google Cloud Platform
 - Artifact Storage: Cloud Storage bucket for MLflow artifacts
 - Database: Cloud SQL (PostgreSQL) for experiment tracking
 - Credentials: Secret Manager for secure database credentials
-- Container Registry: Artifact Registry to store MLflow Docker image
-- Compute: Cloud Run to host MLflow UI (private, accessible via GCP Console)
+- Container Registry: Artifact Registry to store MLflow Docker container
+- Compute: Cloud Run to host MLflow UI
 
-## Downdload and Installation
+## Download and Installation
 
-Open Cloud Shell on GCP and run:
+### Download
+Open Cloud Shell on GCP and run `git clone https://github.com/keiferc/mlops-gcp.git`.
 
+### Installation
+Deploy infrastructure:
 ```bash
-$ git clone https://github.com/keiferc/mlops-gcp.git
-$ cd mlops-gcp/src/
+$ cd mlops-gcp/terraform/
 $ cp terraform.tfvars.example terraform.tfvars # replace placeholders w/ real values
 $ terraform init
+$ terraform validate
+$ terraform plan
 $ terraform apply
-$ docker build -t <region>-docker.pkg.dev/<gcp-project-name>/mlflow/mlflow:latest .
-$ docker push <region>-docker.pkg.dev/<gcp-project-name>/mlflow/mlflow:latest
+```
+
+Deploy MLflow container:
+```bash
+$ cd ../docker/
+$ gcloud auth configure-docker $(terraform output -raw artifact_registry_image_url | cut -d/ -f1)
+$ docker build -t mlflow:latest .
+$ docker tag mlflow:latest $(terraform output -raw artifact_registry_image_url):latest
+$ docker push $(terraform output -raw artifact_registry_image_url):latest
+$ terraform apply -target=google_cloud_run_v2_service.mlflow
 ```
 
 ## Usage

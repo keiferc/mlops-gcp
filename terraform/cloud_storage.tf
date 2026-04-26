@@ -1,19 +1,18 @@
-resource "google_storage_bucket" "artifacts" {
-  name          = var.artifact_bucket_name
-  location      = var.region
-  force_destroy = true # Allow deletion even if bucket contains objects
+# Cloud Storage Bucket for MLflow Artifacts
+resource "google_storage_bucket" "mlflow_artifacts" {
+  name                        = var.mlflow_artifact_bucket_name
+  location                    = var.region
+  uniform_bucket_level_access = true  # Enforce uniform IAM
 
-  versioning {
-    enabled = false # Disable versioning for cost savings in personal projects
-  }
-
-  uniform_bucket_level_access = true
+  # Public Access Prevention
   public_access_prevention = "enforced"
 
-  depends_on = [google_project_service.required_apis]
+  labels = local.labels
 }
 
-output "artifact_bucket_url" {
-  description = "Cloud Storage bucket URL"
-  value       = "gs://${google_storage_bucket.artifacts.name}"
+# Deny public access explicitly
+resource "google_storage_bucket_iam_binding" "mlflow_artifacts_deny_public" {
+  bucket = google_storage_bucket.mlflow_artifacts.name
+  role   = "roles/storage.objectViewer"
+  members = []  # No public members
 }
