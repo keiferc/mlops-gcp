@@ -31,6 +31,7 @@ resource "google_sql_database" "mlflow" {
   project  = var.project_id
   name     = var.cloud_sql_database_name
   instance = google_sql_database_instance.mlflow.name
+  deletion_policy = "ABANDON" # deleted when instance is deleted
 }
 
 resource "google_sql_user" "mlflow" {
@@ -38,4 +39,5 @@ resource "google_sql_user" "mlflow" {
   name     = var.cloud_sql_db_user
   instance = google_sql_database_instance.mlflow.name
   password = random_password.db_password.result
+  deletion_policy = "ABANDON" # deleted when instance is deleted
 }
