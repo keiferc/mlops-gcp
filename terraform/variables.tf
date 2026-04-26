@@ -19,7 +19,7 @@ variable "user_email" {
 }
 
 variable "mlflow_artifact_bucket_name" {
-  description = "Unique name for the Cloud Storage bucket (must be globally unique). Suggest: mlflow-artifacts-${project_id}-${random_suffix}"
+  description = "Unique name for the Cloud Storage bucket (must be globally unique). Suggest: mlflow-artifacts-{project_id}-{random_suffix}"
   type        = string
 }
 
