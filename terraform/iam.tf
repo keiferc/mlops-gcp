@@ -51,3 +51,10 @@ resource "google_cloud_run_v2_service_iam_member" "mlflow_user_invoker" {
   role     = "roles/run.invoker"
   member   = "user:${var.user_email}"
 }
+
+# Grant Cloud Run Service Account permission to use Cloud SQL Auth proxy
+resource "google_project_iam_member" "mlflow_cloud_run_cloudsql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.mlflow_cloud_run.email}"
+}
