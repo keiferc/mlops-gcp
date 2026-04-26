@@ -31,7 +31,7 @@ gcloud services enable cloudresourcemanager.googleapis.com --project=<PROJECT_ID
 terraform init
 terraform validate
 terraform plan
-terraform apply -target=google_project_service.apis -target=google_artifact_registry_repository.mlflow
+terraform apply -target=google_project_service.apis -target=google_artifact_registry_repository.mlflow -target=google_service_account.artifact_registry -target=google_project_iam_member.artifact_registry_writer
 
 # Authenticate Docker and push the MLflow image
 cd ../docker/
