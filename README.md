@@ -48,6 +48,11 @@ terraform apply
 
 Inspect resources with `terraform show` and destroy resources with `terraform destroy`.
 
+View MLFlow UI on Cloud Shell by running:
+```bash
+gcloud run services proxy mlflow-server --region=<REGION> --project=<PROJECT_ID> --port=8080
+```
+Then click the Web Preview icon.
 
 ## Contributing
 
