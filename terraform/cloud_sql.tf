@@ -1,36 +1,41 @@
-# Cloud SQL PostgreSQL Instance
+# ---------------------------------------------------------------------------
+# Cloud SQL PostgreSQL instance — smallest tier for personal projects.
+#
+# deletion_protection = false  -> lets "terraform destroy" delete the instance
+# backup_configuration.enabled = false  → saves cost; enable for production
+# ---------------------------------------------------------------------------
 resource "google_sql_database_instance" "mlflow" {
-  name               = var.cloud_sql_instance_name
-  database_version   = "POSTGRES_15"
-  region             = var.region
-  deletion_protection = false  # Set to true in production for safety
+  depends_on = [google_project_service.apis]
 
-  depends_on = [google_service_networking_connection.private_vpc_connection]
+  project          = var.project_id
+  name             = var.cloud_sql_instance_name
+  database_version = "POSTGRES_15"
+  region           = var.region
+
+  deletion_protection = false
 
   settings {
-    tier              = "db-f1-micro"  # Free tier for personal projects
-    availability_type = "ZONAL"     # Not required for personal use but good practice
+    tier = "db-f1-micro"
+
     backup_configuration {
-      enabled = true
+      enabled = false
     }
 
     ip_configuration {
-      ipv4_enabled                                  = false  # Disable public IP for security
-      private_network                               = "projects/${var.project_id}/global/networks/default"
-      enable_private_path_for_google_cloud_services =  true
+      ipv4_enabled = true
     }
   }
 }
 
-# MLflow Database
 resource "google_sql_database" "mlflow" {
+  project  = var.project_id
   name     = var.cloud_sql_database_name
   instance = google_sql_database_instance.mlflow.name
 }
 
-# MLflow Database User
 resource "google_sql_user" "mlflow" {
+  project  = var.project_id
   name     = var.cloud_sql_db_user
   instance = google_sql_database_instance.mlflow.name
-  password = random_string.db_password.result
+  password = random_password.db_password.result
 }

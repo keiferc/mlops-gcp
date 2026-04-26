@@ -9,11 +9,11 @@ IaC for MLOps on Google Cloud Platform
 
 ## Architecture
 
-- Artifact Storage: Cloud Storage bucket for MLflow artifacts
-- Database: Cloud SQL (PostgreSQL) for experiment tracking
+- Artifact Store: Cloud Storage bucket for MLflow artifacts
+- Backend Store: Cloud SQL (PostgreSQL) for experiment tracking
 - Credentials: Secret Manager for secure database credentials
 - Container Registry: Artifact Registry to store MLflow Docker container
-- Compute: Cloud Run to host MLflow UI
+- Compute/Serve: Cloud Run to host MLflow server
 
 ## Download and Installation
 
@@ -23,23 +23,22 @@ Open Cloud Shell on GCP and run `git clone https://github.com/keiferc/mlops-gcp.
 ### Installation
 Deploy infrastructure:
 ```bash
-$ cd mlops-gcp/terraform/
-$ cp terraform.tfvars.example terraform.tfvars # replace placeholders w/ real values
-$ gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project={project-id}
-$ terraform init
-$ terraform validate
-$ terraform plan
-$ terraform apply
-```
+cd mlops-gcp/terraform/
+cp terraform.tfvars.example terraform.tfvars # fill placeholders
 
-Deploy MLflow container:
-```bash
-$ cd ../docker/
-$ gcloud auth configure-docker $(terraform output -raw artifact_registry_image_url | cut -d/ -f1)
-$ docker build -t mlflow:latest .
-$ docker tag mlflow:latest $(terraform output -raw artifact_registry_image_url):latest
-$ docker push $(terraform output -raw artifact_registry_image_url):latest
-$ terraform apply -target=google_cloud_run_v2_service.mlflow
+# Enable APIs
+terraform init
+terraform validate
+terraform plan
+terraform apply -target=google_project_service.apis -target=google_artifact_registry_repository.mlflow
+
+# Authenticate Docker and push the MLflow image
+gcloud auth configure-docker <REGION>-docker.pkg.dev
+docker build -t <REGION>-docker.pkg.dev/<PROJECT_ID>/mlflow-repo/mlflow:latest .
+docker push <REGION>-docker.pkg.dev/<PROJECT_ID>/mlflow-repo/mlflow:latest
+
+# Deploy
+terraform apply
 ```
 
 ## Usage
@@ -54,9 +53,9 @@ Inspect resources with `terraform show` and destroy resources with `terraform de
 
 ### Installation
 ```bash
-$ uv sync --dev
-$ uv run pre-commit autoupdate
-$ uv run pre-commit install
+uv sync --dev
+uv run pre-commit autoupdate
+uv run pre-commit install
 ```
 
 ### Guidelines

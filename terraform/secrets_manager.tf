@@ -1,38 +1,40 @@
-# Store Cloud SQL Database Password in Secrets Manager
-resource "google_secret_manager_secret" "db_password" {
-  secret_id = "mlflow-db-password"
-  depends_on = [google_project_service.required_apis["secretmanager.googleapis.com"]]
+# ---------------------------------------------------------------------------
+# Random password for the MLflow PostgreSQL user.
+# special = false avoids characters that would require URL-encoding in the
+# connection URI.
+#
+# Password is stored in terraform.tfstate — keep that file secure.
+# ---------------------------------------------------------------------------
+resource "random_password" "db_password" {
+  length  = 32
+  special = false
+}
+
+# Store the full PostgreSQL connection URI as one secret so Cloud Run can
+# inject it directly as an env var — no string manipulation at runtime.
+resource "google_secret_manager_secret" "mlflow_db_url" {
+  depends_on = [google_project_service.apis]
+
+  project   = var.project_id
+  secret_id = "mlflow-db-url"
 
   replication {
     auto {}
   }
 }
 
-# Secret Version (actual password value)
-resource "google_secret_manager_secret_version" "db_password" {
-  secret      = google_secret_manager_secret.db_password.id
-  secret_data = random_string.db_password.result
-  depends_on = [google_project_service.required_apis["secretmanager.googleapis.com"]]
+resource "google_secret_manager_secret_version" "mlflow_db_url" {
+  secret = google_secret_manager_secret.mlflow_db_url.id
+
+  # Cloud Run mounts the Cloud SQL socket at /cloudsql/.
+  # SQLAlchemy psycopg2 uses the `host` query param for the socket directory.
+  secret_data = "postgresql+psycopg2://${var.cloud_sql_db_user}:${random_password.db_password.result}@/${var.cloud_sql_database_name}?host=/cloudsql/${var.project_id}:${var.region}:${var.cloud_sql_instance_name}"
 }
 
-# Store Cloud SQL connection string secret
-resource "google_secret_manager_secret" "db_connection_string" {
-  secret_id = "mlflow-db-connection-string"
-  depends_on = [google_project_service.required_apis["secretmanager.googleapis.com"]]
-
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "db_connection_string" {
-  secret = google_secret_manager_secret.db_connection_string.id
-  secret_data = format(
-    "postgresql://%s:%s@%s/%s",
-    var.cloud_sql_db_user,
-    random_string.db_password.result,
-    google_sql_database_instance.mlflow.private_ip_address,
-    var.cloud_sql_database_name
-  )
-  depends_on = [google_project_service.required_apis["secretmanager.googleapis.com"]]
+# Allow the Cloud Run SA to read this secret at container startup.
+resource "google_secret_manager_secret_iam_member" "cloud_run_secret" {
+  project   = var.project_id
+  secret_id = google_secret_manager_secret.mlflow_db_url.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.cloud_run.email}"
 }

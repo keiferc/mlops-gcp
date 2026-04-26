@@ -1,54 +1,50 @@
 variable "project_id" {
-  description = "GCP Project ID"
+  description = "Your GCP project ID (e.g. my-project-123456)"
   type        = string
 }
 
 variable "region" {
-  description = "GCP region for resources"
+  description = "GCP region for all resources"
   type        = string
   default     = "us-central1"
 }
 
 variable "user_email" {
-  description = "Your email address. Used to grant Cloud Run access."
+  description = "Your Google account email — this account gets access to the MLflow UI"
   type        = string
-  validation {
-    condition     = can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", var.user_email))
-    error_message = "Must be a valid email address."
-  }
 }
 
 variable "mlflow_artifact_bucket_name" {
-  description = "Unique name for the Cloud Storage bucket (must be globally unique). Suggest: mlflow-artifacts-{project_id}-{random_suffix}"
+  description = "GCS bucket name for MLflow artifacts. Must be globally unique across all of GCP."
   type        = string
 }
 
 variable "artifact_registry_repo_name" {
-  description = "Artifact Registry repository name"
+  description = "Artifact Registry Docker repository name"
   type        = string
   default     = "mlflow-repo"
 }
 
 variable "cloud_run_service_name" {
-  description = "Cloud Run service name"
+  description = "Cloud Run service name for the MLflow server"
   type        = string
   default     = "mlflow-server"
 }
 
 variable "cloud_sql_instance_name" {
-  description = "Cloud SQL instance name"
+  description = "Cloud SQL instance name. After deletion, this name cannot be reused for 7 days."
   type        = string
   default     = "mlflow-postgres"
 }
 
 variable "cloud_sql_database_name" {
-  description = "Database name in Cloud SQL"
+  description = "PostgreSQL database name for MLflow"
   type        = string
-  default     = "mlflow"
+  default     = "mlflow-db"
 }
 
 variable "cloud_sql_db_user" {
-  description = "Database user name"
+  description = "PostgreSQL username for MLflow"
   type        = string
-  default     = "mlflow"
+  default     = "mlflow-user"
 }
