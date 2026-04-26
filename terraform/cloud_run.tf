@@ -3,8 +3,6 @@ resource "google_cloud_run_v2_service" "mlflow" {
   name     = var.cloud_run_service_name
   location = var.region
 
-  deletion_protection = false
-
   template {
     service_account = google_service_account.mlflow_cloud_run.email
 
