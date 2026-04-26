@@ -1,17 +1,10 @@
 # ---------------------------------------------------------------------------
-# Dedicated service account for the Artifact Registry Cloud Build
+# Grants artifact registry writing permissions to user
 # ---------------------------------------------------------------------------
-resource "google_service_account" "artifact_registry" {
-  project      = var.project_id
-  account_id   = "artifact-registry-sa"
-  display_name = "Artifact Registry Service Account"
-}
-
-# Cloud Run needs Cloud SQL Client to open the Unix socket to PostgreSQL.
 resource "google_project_iam_member" "artifact_registry_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
-  member  = "serviceAccount:${google_service_account.artifact_registry.email}"
+  member  = "user:${var.user_email}"
 }
 
 # ---------------------------------------------------------------------------
