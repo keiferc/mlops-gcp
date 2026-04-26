@@ -18,17 +18,52 @@ provider "google" {
   region  = var.region
 }
 
-# Generate a random suffix for uniqueness
+# Generate random password for Cloud SQL
 resource "random_string" "db_password" {
   length  = 32
   special = true
 }
 
-# Local values for common naming and configurations
-locals {
-  environment = "mlflow"
-  labels = {
-    environment = local.environment
-    managed_by  = "terraform"
+# Enable required APIs
+resource "google_project_service" "required_apis" {
+  for_each = toset([
+    "compute.googleapis.com",
+    "servicenetworking.googleapis.com",
+    "iam.googleapis.com",
+    "sqladmin.googleapis.com",
+    "storage.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com",
+    "secretmanager.googleapis.com"
+  ])
+
+  service  = each.value
+  project  = var.project_id
+
+  timeouts {
+    create = "30m"
+    update = "40m"
   }
+
+  disable_on_destroy = true
+}
+
+# Reserve global address for Private Service Connection
+resource "google_compute_global_address" "private_sql_ip" {
+  name          = "google-managed-services-default"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = "default"
+
+  depends_on = [google_project_service.required_apis]
+}
+
+# Create the Private Service Connection
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = "default"
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_sql_ip.name]
+
+  depends_on = [google_project_service.required_apis]
 }

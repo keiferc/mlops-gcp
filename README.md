@@ -25,6 +25,7 @@ Deploy infrastructure:
 ```bash
 $ cd mlops-gcp/terraform/
 $ cp terraform.tfvars.example terraform.tfvars # replace placeholders w/ real values
+$ gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project={project-id}
 $ terraform init
 $ terraform validate
 $ terraform plan

@@ -5,9 +5,11 @@ resource "google_sql_database_instance" "mlflow" {
   region             = var.region
   deletion_protection = false  # Set to true in production for safety
 
+  depends_on = [google_service_networking_connection.private_vpc_connection]
+
   settings {
     tier              = "db-f1-micro"  # Free tier for personal projects
-    availability_type = "REGIONAL"     # Not required for personal use but good practice
+    availability_type = "ZONAL"     # Not required for personal use but good practice
     backup_configuration {
       enabled = true
     }

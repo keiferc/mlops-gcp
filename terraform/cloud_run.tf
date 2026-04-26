@@ -35,10 +35,15 @@ resource "google_cloud_run_v2_service" "mlflow" {
         container_port = 5000
       }
     }
+
+    vpc_access {
+      network_interfaces {
+        network    = "default"
+        subnetwork = "default"
+      }
+      egress = "PRIVATE_RANGES_ONLY"
+    }
   }
 
-  traffic {
-    type    = "ALL"
-    percent = 100
-  }
+  depends_on = [google_sql_database_instance.mlflow, google_artifact_registry_repository.mlflow]
 }

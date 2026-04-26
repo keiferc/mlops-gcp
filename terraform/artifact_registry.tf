@@ -4,6 +4,5 @@ resource "google_artifact_registry_repository" "mlflow" {
   repository_id = var.artifact_registry_repo_name
   description   = "MLflow server Docker images"
   format        = "DOCKER"
-
-  labels = local.labels
+  depends_on = [google_project_service.required_apis["artifactregistry.googleapis.com"]]
 }

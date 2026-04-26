@@ -6,8 +6,6 @@ resource "google_storage_bucket" "mlflow_artifacts" {
 
   # Public Access Prevention
   public_access_prevention = "enforced"
-
-  labels = local.labels
 }
 
 # Deny public access explicitly

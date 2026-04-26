@@ -2,10 +2,13 @@
 resource "google_service_account" "mlflow_cloud_run" {
   account_id   = "mlflow-cloud-run"
   display_name = "MLflow Cloud Run Service Account"
+  depends_on = [google_project_service.required_apis["iam.googleapis.com"]]
 }
 
 # Get Default Compute Engine Service Account (used by Vertex AI)
-data "google_compute_default_service_account" "default" {}
+data "google_compute_default_service_account" "default" {
+  depends_on = [google_project_service.required_apis["compute.googleapis.com"]]
+}
 
 # Grant Default Service Account access to Cloud SQL (for Vertex AI)
 resource "google_project_iam_member" "default_cloudsql_client" {
@@ -26,6 +29,7 @@ resource "google_secret_manager_secret_iam_member" "default_db_password" {
   secret_id = google_secret_manager_secret.db_password.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [google_project_service.required_apis["secretmanager.googleapis.com"]]
 }
 
 # Grant Default Service Account access to connection string secret
@@ -33,6 +37,7 @@ resource "google_secret_manager_secret_iam_member" "default_db_conn_string" {
   secret_id = google_secret_manager_secret.db_connection_string.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+  depends_on = [google_project_service.required_apis["secretmanager.googleapis.com"]]
 }
 
 # Grant Cloud Run Service Account permission to pull images from Artifact Registry
