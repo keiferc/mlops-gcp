@@ -1,13 +1,8 @@
-# ---------------------------------------------------------------------------
-# Random password for the MLflow PostgreSQL user.
-# special = false avoids characters that would require URL-encoding in the
-# connection URI.
-#
-# Password is stored in terraform.tfstate — keep that file secure.
-# ---------------------------------------------------------------------------
 resource "random_password" "db_password" {
   length  = 32
-  special = false
+  special = false # prevents URL encoding issues
+  min_numeric = 2
+  min_upper = 2
 }
 
 # Store the full PostgreSQL connection URI as one secret so Cloud Run can

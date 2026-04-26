@@ -1,9 +1,3 @@
-# ---------------------------------------------------------------------------
-# Cloud SQL PostgreSQL instance — smallest tier for personal projects.
-#
-# deletion_protection = false  -> lets "terraform destroy" delete the instance
-# backup_configuration.enabled = false  → saves cost; enable for production
-# ---------------------------------------------------------------------------
 resource "google_sql_database_instance" "mlflow" {
   depends_on = [google_project_service.apis]
 
@@ -15,10 +9,10 @@ resource "google_sql_database_instance" "mlflow" {
   deletion_protection = false
 
   settings {
-    tier = "db-f1-micro"
+    tier = "db-f1-micro" # smallest tier for cost savings
 
     backup_configuration {
-      enabled = false
+      enabled = false # saves cost; enable for production
     }
 
     ip_configuration {
@@ -31,7 +25,7 @@ resource "google_sql_database" "mlflow" {
   project  = var.project_id
   name     = var.cloud_sql_database_name
   instance = google_sql_database_instance.mlflow.name
-  deletion_policy = "ABANDON" # deleted when instance is deleted
+  deletion_policy = "ABANDON" # resource deleted when instance is deleted
 }
 
 resource "google_sql_user" "mlflow" {
@@ -39,5 +33,5 @@ resource "google_sql_user" "mlflow" {
   name     = var.cloud_sql_db_user
   instance = google_sql_database_instance.mlflow.name
   password = random_password.db_password.result
-  deletion_policy = "ABANDON" # deleted when instance is deleted
+  deletion_policy = "ABANDON" # resource deleted when instance is deleted
 }

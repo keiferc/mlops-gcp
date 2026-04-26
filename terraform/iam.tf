@@ -27,10 +27,6 @@ data "google_compute_default_service_account" "default" {
 # Cloud Run invoker grants — NO public (allUsers) access is granted.
 # Cloud Run automatically rejects requests without a valid Google identity
 # token, so only these two principals can reach the MLflow server.
-#
-# To open the MLflow UI in your browser, run:
-#   gcloud run services proxy SERVICE_NAME --region=REGION --port=5000
-# then open http://localhost:5000
 # ---------------------------------------------------------------------------
 resource "google_cloud_run_v2_service_iam_member" "owner_invoker" {
   project  = var.project_id

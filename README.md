@@ -9,11 +9,12 @@ IaC for MLOps on Google Cloud Platform
 
 ## Architecture
 
-- Artifact Store: Cloud Storage bucket for MLflow artifacts
-- Backend Store: Cloud SQL (PostgreSQL) for experiment tracking
-- Credentials: Secret Manager for secure database credentials
-- Container Registry: Artifact Registry to store MLflow Docker container
-- Compute/Serve: Cloud Run to host MLflow server
+- Artifact Registry: Repository for MLflow Docker container
+- Cloud SQL: MLflow back-end store (PostgreSQL) for experiment tracking
+- Cloud Storage: bucket for MLflow artifacts store
+- Cloud Run: Serves MLflow container
+- Secrets Manager: Securely stores database credentials and sensitive URIs
+- IAM: Manages service account permissions to architecture components
 
 ## Download and Installation
 
@@ -31,8 +32,9 @@ cp terraform.tfvars.example terraform.tfvars # fill placeholders
 gcloud services enable cloudresourcemanager.googleapis.com --project=<PROJECT_ID>
 terraform init
 terraform validate
-terraform plan
-terraform apply -target=google_project_service.apis -target=google_artifact_registry_repository.mlflow
+terraform plan # check plan logic
+terraform apply -target=google_project_service.apis # enable APIs
+terraform apply -target=google_artifact_registry_repository.mlflow
 
 # Authenticate Docker and push the MLflow image to Artifact Registry
 cd ../docker/
@@ -41,6 +43,7 @@ gcloud builds submit --tag <REGION>-docker.pkg.dev/<PROJECT_ID>/mlflow-repo/mlfl
 
 # Deploy infrastructure
 cd ../terraform/
+terraform plan # check plan logic
 terraform apply
 ```
 

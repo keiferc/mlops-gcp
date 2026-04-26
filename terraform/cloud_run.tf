@@ -1,13 +1,3 @@
-# ---------------------------------------------------------------------------
-# Cloud Run service running the MLflow tracking server.
-#
-# The shell wrapper (command + args) is required so that the environment
-# variable $MLFLOW_BACKEND_STORE_URI — injected from Secret Manager — is
-# expanded by the shell at container startup time.
-#
-# Note: Terraform interpolates ${var.*} at plan/apply time.
-#       The shell expands $MLFLOW_BACKEND_STORE_URI at container runtime.
-# ---------------------------------------------------------------------------
 resource "google_cloud_run_v2_service" "mlflow" {
   depends_on = [
     google_project_service.apis,

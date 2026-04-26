@@ -1,8 +1,3 @@
-# ---------------------------------------------------------------------------
-# GCS bucket for MLflow artifact storage.
-# force_destroy = true allows "terraform destroy" to delete the bucket even
-# when it contains experiment artifacts
-# ---------------------------------------------------------------------------
 resource "google_storage_bucket" "mlflow_artifacts" {
   depends_on = [google_project_service.apis]
 
