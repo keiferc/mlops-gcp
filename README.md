@@ -22,21 +22,20 @@ IaC for MLOps on Google Cloud Platform
 Open Cloud Shell on GCP and run `git clone https://github.com/keiferc/mlops-gcp.git`.
 
 ### Installation
-Deploy infrastructure:
 ```bash
 # Set variables
 cd mlops-gcp/terraform/
 cp terraform.tfvars.example terraform.tfvars # fill placeholders
 
-# Enable APIs and config Artifact Registry
+# Enable APIs
 gcloud services enable cloudresourcemanager.googleapis.com --project=<PROJECT_ID>
 terraform init
 terraform validate
 terraform plan # check plan logic
 terraform apply -target=google_project_service.apis # enable APIs
-terraform apply -target=google_artifact_registry_repository.mlflow
 
-# Authenticate Docker and push the MLflow image to Artifact Registry
+# Deploy MLflow container to Artifact Registry
+terraform apply -target=google_artifact_registry_repository.mlflow
 cd ../docker/
 gcloud auth configure-docker <REGION>-docker.pkg.dev
 gcloud builds submit --tag <REGION>-docker.pkg.dev/<PROJECT_ID>/mlflow-repo/mlflow:latest --project <PROJECT_ID> .
@@ -51,11 +50,11 @@ terraform apply
 
 Inspect resources with `terraform show` and destroy resources with `terraform destroy`.
 
-View MLFlow UI on Cloud Shell by running:
+View MLFlow UI by running the following on Cloud Shell:
 ```bash
 gcloud run services proxy mlflow-server --region=<REGION> --project=<PROJECT_ID> --port=8080
 ```
-Then click the Web Preview icon.
+then clicking the Web Preview icon.
 
 ## Contributing
 
