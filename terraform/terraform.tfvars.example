@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your values
+project_id                    = "your-gcp-project-id"
+region                        = "us-central1"
+user_email                    = "your-email@gmail.com"
+mlflow_artifact_bucket_name   = "mlflow-artifacts-yourproject-12345"  # Must be globally unique
+artifact_registry_repo_name   = "mlflow-repo"
+cloud_run_service_name        = "mlflow-server"
+cloud_sql_instance_name       = "mlflow-postgres"
+cloud_sql_database_name       = "mlflow-db"
+cloud_sql_db_user             = "mlflow-user"
